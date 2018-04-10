@@ -202,7 +202,7 @@ Parameters:
     Description: The DAS Node 2 Static IP Address
   ALBCertificateARN:
     Type: String
-    Default: ""
+    Default: "arn:aws:acm:us-west-1:809489900555:certificate/916cfe69-5a1e-4c20-a1ca-fe58b12cbbc5"
     Description: Enter the ARN value of the certificate uploaded to ACM for Application Load Balancers
 # Conditions
 Conditions:
@@ -439,6 +439,16 @@ Resources:
         FromPort: 0
         ToPort: 65535
         CidrIp: 10.0.254.0/24
+  WSO2EnvLBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for DAS ALB
+      VpcId: !Ref WSO2DASEnvVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
 
   ###########################
   # Create Elastic IPs
@@ -524,7 +534,7 @@ Resources:
             cd cloudformation-das/scripts
             bash ./setup-env.sh -user ubuntu -wumuser ${WUMUsername} -wumpassword '${WUMPassword}' -jdk ${JDK} -dbengine ${DBEngine}
             bash ./init-rds.sh -user ubuntu -rdshost ${WSO2EnvDBInstance.Endpoint.Address} -rdsport ${WSO2EnvDBInstance.Endpoint.Port} -rdsengine ${DBEngine} -rdsversion ${DBEngineVersion} -rdsusername ${DBUsername} -rdspassword ${DBPassword} -productname ${ProductName} -productversion ${ProductVersion}
-            bash ./setup-das.sh -user ubuntu -rdshost ${WSO2EnvDBInstance.Endpoint.Address} -rdsport ${WSO2EnvDBInstance.Endpoint.Port} -rdsengine ${DBEngine} -rdsversion ${DBEngineVersion} -rdsusername ${DBUsername} -rdspassword ${DBPassword} -mynodeid active-node -productname ${ProductName} -productversion ${ProductVersion} -awsid ${AWSAccessKeyId} -awssecret ${AWSAccessKeySecret} -securitygroup ${WSO2EnvInstanceSecurityGroup.GroupId} -region ${AWS::Region} -das2ip ${DASNodeIP2}
+            bash ./setup-das.sh -user ubuntu -rdshost ${WSO2EnvDBInstance.Endpoint.Address} -rdsport ${WSO2EnvDBInstance.Endpoint.Port} -rdsengine ${DBEngine} -rdsversion ${DBEngineVersion} -rdsusername ${DBUsername} -rdspassword ${DBPassword} -mynodeid Node-A -productname ${ProductName} -productversion ${ProductVersion} -das2ip ${DASNodeIP2} -awsid ${AWSAccessKeyId} -awssecret ${AWSAccessKeySecret} -securitygroup ${WSO2EnvInstanceSecurityGroup.GroupId} -region ${AWS::Region}
       Tags:
         - Key: Name
           Value: wso2-das-active
@@ -554,10 +564,66 @@ Resources:
               chown -R ubuntu cloudformation-das
               cd cloudformation-das/scripts
               bash ./setup-env.sh -user ubuntu -wumuser ${WUMUsername} -wumpassword '${WUMPassword}' -jdk ${JDK} -dbengine ${DBEngine}
-              bash ./setup-das.sh -user ubuntu -rdshost ${WSO2EnvDBInstance.Endpoint.Address} -rdsport ${WSO2EnvDBInstance.Endpoint.Port} -rdsengine ${DBEngine} -rdsversion ${DBEngineVersion} -rdsusername ${DBUsername} -rdspassword ${DBPassword} -mynodeid active-node -productname ${ProductName} -productversion ${ProductVersion} -awsid ${AWSAccessKeyId} -awssecret ${AWSAccessKeySecret} -securitygroup ${WSO2EnvInstanceSecurityGroup.GroupId} -region ${AWS::Region} -das2ip ${DASNodeIP1}
+              bash ./setup-das.sh -user ubuntu -rdshost ${WSO2EnvDBInstance.Endpoint.Address} -rdsport ${WSO2EnvDBInstance.Endpoint.Port} -rdsengine ${DBEngine} -rdsversion ${DBEngineVersion} -rdsusername ${DBUsername} -rdspassword ${DBPassword} -mynodeid Node-B -productname ${ProductName} -productversion ${ProductVersion} -das2ip ${DASNodeIP1} -awsid ${AWSAccessKeyId} -awssecret ${AWSAccessKeySecret} -securitygroup ${WSO2EnvInstanceSecurityGroup.GroupId} -region ${AWS::Region}
         Tags:
           - Key: Name
             Value: wso2-das-passive
+
+  ########################
+  # Create Load Balancers
+  #######################
+  WSO2EnvDASApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: wso2-das
+      Scheme: internet-facing
+      Subnets:
+        - !Ref WSO2EnvPublicSubnet
+        - !Ref WSO2EnvPublicSubnet2
+      SecurityGroups:
+        - !Ref WSO2EnvLBSecurityGroup
+  WSO2EnvDASALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 4
+      HealthCheckPath: /carbon/admin/login.jsp
+      HealthCheckPort: 9443
+      Matcher:
+        HttpCode: 200
+      Name: das-carbon-9443
+      Port: 443
+      Protocol: HTTPS
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: '20'
+      - Key: stickiness.enabled
+        Value: 'true'
+      Targets:
+      - Id: !Ref WSO2EnvActiveDASInstance
+        Port: 9443
+      - Id: !Ref WSO2EnvPassiveDASInstance
+        Port: 9443
+      UnhealthyThresholdCount: 3
+      VpcId:
+        Ref: WSO2DASEnvVPC
+      Tags:
+      - Key: Name
+        Value: das-carbon-9443
+  WSO2EnvDASALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WSO2EnvDASALBTargetGroup
+      Certificates:
+        - CertificateArn: !Ref ALBCertificateARN
+      LoadBalancerArn: !Ref WSO2EnvDASApplicationLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS-1-1-2017-01
 
 #####################################
 # Print details of the created stack
