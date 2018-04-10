@@ -650,6 +650,6 @@ Outputs:
   ServerPort:
     Value: 443
     Description: Listening Port of ALB fronting WSO2 DAS Instance
-  WSO2ISMCURL:
+  WSO2DASMCURL:
     Value: !Sub 'https://${WSO2EnvDASApplicationLoadBalancer.DNSName}/carbon'
     Description: Access URL of the Management Console
