@@ -631,10 +631,10 @@ Resources:
 Outputs:
   DatabaseHost:
     Value: !Sub '${WSO2EnvDBInstance.Endpoint.Address}'
-    Description: "Database Host"
+    Description: Database Host
   DatabasePort:
     Value: !Sub '${WSO2EnvDBInstance.Endpoint.Port}'
-    Description: "Database Port"
+    Description: Database Port
   BastionEIP:
     Value: !Sub '${WSO2EnvBastionInstance.PublicIp}'
     Description: Elastic IP of the Bastion Instance
@@ -644,3 +644,12 @@ Outputs:
   WSO2PassiveDASPrivateIP:
     Value: !Sub '${WSO2EnvPassiveDASInstance.PrivateIp}'
     Description: Private IP of the WSO2 DAS Passive Instance
+  ServerHost:
+    Value: !Sub '${WSO2EnvDASApplicationLoadBalancer.DNSName}'
+    Description: DNS Name of the ALB fronting WSO2 DAS Instance
+  ServerPort:
+    Value: 443
+    Description: Listening Port of ALB fronting WSO2 DAS Instance
+  WSO2ISMCURL:
+    Value: !Sub 'https://${WSO2EnvDASApplicationLoadBalancer.DNSName}/carbon'
+    Description: Access URL of the Management Console
