@@ -713,7 +713,7 @@
 
         <members>
             <member>
-                <hostName>#_DAS_HOSTNAME_#</hostName>
+                <hostName>#_DAS1_HOSTNAME_#</hostName>
                 <port>4000</port>
             </member>
             <member>

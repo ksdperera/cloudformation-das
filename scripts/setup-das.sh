@@ -64,7 +64,7 @@ setup_wum_updated_pack() {
 copy_libs() {
 
     echo ">> Copying $DB_ENGINE jdbc driver "
-    cp /tmp/jdbc-connector.jar ${PRODUCT_HOME}/repository/components/lib
+    cp /tmp/jdbc-connector.jar ${PRODUCT_HOME}/repository/components/lib/
 }
 
 copy_config_files() {
@@ -88,6 +88,7 @@ configure_product() {
 
     echo ">> Configuring product "
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS_HOSTNAME_#/'$DAS_HOST_NAME'/g'
+    find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS1_HOSTNAME_#/'$DAS_HOST_NAME'/g'
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS2_HOSTNAME_#/'$DAS2_HOSTNAME'/g'
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_AWS_ACCESS_KEY_ID_#/'$AWS_ACCESS_KEY_ID'/g'
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_AWS_ACCESS_KEY_SECRET_#/'$AWS_ACCESS_KEY_SECRET'/g'
