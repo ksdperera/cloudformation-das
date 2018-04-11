@@ -49,6 +49,7 @@ readonly WSO2_UM_DB="WSO2_UM_DB"
 readonly WSO2_REG_DB="WSO2_REG_DB"
 readonly WSO2_ANALYTICS_EVENT_STORE="WSO2_ANALYTICS_EVENT_STORE_DB"
 readonly WSO2_ANALYTICS_PROCESSED_DATA_STORE="WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB"
+readonly WSO2_AM_STATS_DB="WSO2_AM_STATS_DB"
 
 setup_wum_updated_pack() {
 
@@ -102,11 +103,13 @@ configure_product() {
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_REG_DB_#/'\\/$WSO2_REG_DB'/g'
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB_#/'\\/$WSO2_ANALYTICS_PROCESSED_DATA_STORE'/g'
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_WSO2_ANALYTICS_EVENT_STORE_DB_#/'\\/$WSO2_ANALYTICS_EVENT_STORE'/g'
+      find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_WSO2_AM_STATS_DB_#/'\\/$WSO2_AM_STATS_DB'/g'
     elif [ $DB_ENGINE = "sqlserver-ex" ]; then
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_UM_DB_#/'\;databaseName=$WSO2_UM_DB'/g'
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_REG_DB_#/'\;databaseName=$WSO2_REG_DB'/g'
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_WSO2_ANALYTICS_PROCESSED_DATA_STORE_DB_#/'\;databaseName=$WSO2_ANALYTICS_PROCESSED_DATA_STORE'/g'
       find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_WSO2_ANALYTICS_EVENT_STORE_DB_#/'\;databaseName=$WSO2_ANALYTICS_EVENT_STORE'/g'
+      find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_WSO2_AM_STATS_DB_#/'\;databaseName=$WSO2_AM_STATS_DB'/g'
     fi
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_DB_USER_#/'$DB_USERNAME'/g'
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" \) -print0 | xargs -0 sed -i 's/#_DB_PWD_#/'$DB_PASSWORD'/g'
