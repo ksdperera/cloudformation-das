@@ -90,7 +90,7 @@
          <!--<table>.*jmx.*</table>-->
       </purge-include-tables>
       <!-- All records that insert before the specified retention time will be eligible to purge -->
-      <data-retention-days>15</data-retention-days>
+      <data-retention-days>2</data-retention-days>
    </analytics-data-purging>
    <static-quorum enabled="true">
       <quorum-size>2</quorum-size>
