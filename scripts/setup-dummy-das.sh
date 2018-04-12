@@ -59,7 +59,7 @@ configure_product() {
 
     echo ">> Configuring product "
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS_HOSTNAME_#/'$DAS_HOST_NAME'/g'
-    find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS1_HOSTNAME_#/'$DAS1_HOST_NAME'/g'
+    find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS1_HOSTNAME_#/'$DAS1_HOSTNAME'/g'
     find ${PRODUCT_HOME}/ -type f \( -iname "*.properties" -o -iname "*.xml" -o -iname "*.sh" \) -print0 | xargs -0 sed -i 's/#_DAS2_HOSTNAME_#/'$DAS2_HOSTNAME'/g'
     echo "Done!"
 }
