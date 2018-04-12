@@ -14,7 +14,8 @@ This repository contains AWS CloudFormation templates for WSO2 Data Analytics Se
 5. Select Create Stack option and select choose a template option.
 6. Browse and select the cloudformation template under cloudformation-templates directory for the deployment pattern 
 preferred and proceed with the deployment. Supported deployment patterns are as below.
-   1. Pattern2: WSO2 Data Analytics Server two node clustered deployment with external datasources
+   1. Pattern2: WSO2 Data Analytics Server Minimum HA deployment with external RDS
+   2. Pattern-analytics-apim-solution: APIM Analytics 2.1.0 Minimum HA Cluster with APIM 2.1.0 all in one single node as data publisher.
 7. Follow the on screen instructions, and provide the ARN of the certificate uploaded in step 3, SSH key, and other 
 requested information and proceed.  
  
