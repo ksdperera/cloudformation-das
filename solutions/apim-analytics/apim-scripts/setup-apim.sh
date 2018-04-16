@@ -39,6 +39,7 @@ readonly WUM_PRODUCT_NAME=${PRODUCT_NAME}-${PRODUCT_VERSION}
 readonly WUM_PRODUCT_DIR=/home/${USERNAME}/.wum-wso2/products/${PRODUCT_NAME}/${PRODUCT_VERSION}
 readonly INSTALLATION_DIR=/opt/wso2
 readonly PRODUCT_HOME="${INSTALLATION_DIR}/${PRODUCT_NAME}-${PRODUCT_VERSION}"
+readonly DB_SCRIPTS_PATH="${PRODUCT_HOME}/dbscripts/apimgt"
 
 # databases
 readonly WSO2_AM_DB="WSO2_AM_DB"
@@ -99,6 +100,42 @@ configure_product() {
     echo "Done!"
 }
 
+init_mysql_rds() {
+
+    echo ">> Setting up MySQL databases ..."
+    echo ">> Creating databases..."
+    mysql -h $DB_HOST -P $DB_PORT -u $DB_USERNAME -p$DB_PASSWORD \
+    -e "DROP DATABASE IF EXISTS $WSO2_AM_DB;
+    CREATE DATABASE $WSO2_AM_DB;"
+
+    echo ">> Databases created!"
+
+    echo ">> Creating tables..."
+    if [[ $DB_VERSION == "5.7*" ]]; then
+        mysql -h $DB_HOST -P $DB_PORT -u $DB_USERNAME -p$DB_PASSWORD \
+        -e "USE $WSO2_AM_DB;
+        GRANT ALL PRIVILEGES ON $WSO2_AM_DB.* TO '$DB_USERNAME'@'%';
+        SOURCE $DB_SCRIPTS_PATH/mysql5.7.sql;"
+    else
+        mysql -h $DB_HOST -P $DB_PORT -u $DB_USERNAME -p$DB_PASSWORD \
+        -e "USE $WSO2_AM_DB;
+        GRANT ALL PRIVILEGES ON $WSO2_AM_DB.* TO '$DB_USERNAME'@'%';
+        SOURCE $DB_SCRIPTS_PATH/mysql.sql;"
+    fi
+    echo ">> Tables created!"
+}
+
+init_sqlserver_rds() {
+    echo ">> Setting up SQLServer databases ..."
+    echo ">> Creating databases..."
+    sqlcmd -S $DB_HOST -U $DB_USERNAME -P $DB_PASSWORD -Q "CREATE DATABASE $WSO2_AM_DB"
+    echo ">> Databases created!"
+
+    echo ">> Creating tables..."
+    sqlcmd -S $DB_HOST -U $DB_USERNAME -P $DB_PASSWORD -d $WSO2_AM_DB -i $DB_SCRIPTS_PATH/mssql.sql
+    echo ">> Tables created!"
+}
+
 get_host_ip() {
   DAS_HOST_NAME=""
   DAS_HOST_NAME= ifconfig | awk '/inet addr/{split($2,a,":"); print a[2]}' | awk 'NR == 1'
@@ -145,6 +182,11 @@ start_product() {
 
 main() {
     setup_wum_updated_pack
+    if [ $DB_ENGINE = "mysql" ]; then
+    init_mysql_rds
+    elif [ $DB_ENGINE = "sqlserver-ex" ]; then
+    init_sqlserver_rds
+    fi
     copy_libs
     copy_bin_files
     copy_config_files
